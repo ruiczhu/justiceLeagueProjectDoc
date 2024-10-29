@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE instance-profile
+        SYSTEM "https://resources.jetbrains.com/writerside/1.0/product-profile.dtd">
+
+<instance-profile id="jlp"
+                 name="Justice League Project"
+                 start-page="Project-Planning.md">
+
+    <toc-element topic="Project-Planning.md"/>
+    <toc-element topic="System-Design.md"/>
+    <toc-element topic="Implementation-and-Testing.md"/>
+    <toc-element topic="System-Analysis.md"/>
+    <toc-element topic="Presentation.md"/>
+    <toc-element topic="Our-team.md"/>
+</instance-profile>
