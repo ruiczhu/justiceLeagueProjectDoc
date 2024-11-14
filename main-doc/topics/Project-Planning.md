@@ -33,15 +33,13 @@
         </chapter>
     </tab>
     <tab title="IDEA2">
-        <chapter title="Real-time Object Segmentation and Replacement System">
+        <chapter title="Video Object Segmentation and Replacement System">
             <b>Description:</b>
-            <p>This project aims to segment user-specified objects in real-time through a camera and replace them with user-specified objects.
-            The system will use Python, OpenCV, and the Segment Anything Model (SAM) for object segmentation,
-            and GALA3D to generate replacement object images to fit the current scene.</p>
+            <p>This project aims to segment user-specified objects in a video and replace them with user-specified objects.
+            The system will use Python, and the Segment Anything Model 2(SAM2) for object segmentation,
+            and OpenCV to generate replacement object images to fit the current scene.</p>
             <b>Expected results:</b>
-            <p><b>Real-time segmentation and replacement:</b>
-            The system can segment and replace specified objects in real-time.<br/>
-            <b>High accuracy:</b>
+            <p><b>High accuracy:</b>
             The segmentation and replacement accuracy is high, and the effect is natural.<br/>
             <b>User-friendly interface:</b>
             Provides a simple and intuitive user interface, making it easy for users to select and replace objects.<br/>
@@ -49,7 +47,7 @@
             The system has good scalability and can add more objects and replacement options.</p>
             <b>Expected dataset to be used:</b>
             <p><b>Pre-trained models:</b>
-            Both SAM and GALA3D are pre-trained models that can be used directly without additional datasets for training.</p>
+             SAM2 is pre-trained model that can be used directly without additional datasets for training.</p>
         </chapter>
     </tab>
     <tab title="IDEA3">
@@ -190,14 +188,14 @@
 
 ### Project Title:
 
-### Real-time Object Segmentation and Replacement System Based on SAM
+### Object Segmentation and Replacement System Based on SAM2
 
 ### Introduction:
 
-The **Real-time Object Segmentation and Replacement System Based on SAM**
-aims to segment user-specified objects in real-time through a camera and
+The **Object Segmentation and Replacement System Based on SAM2**
+aims to segment user-specified objects in a video and
 replace them with user-specified objects. The system leverages Python,
-OpenCV, and the Segment Anything Model (SAM) for object segmentation and
+OpenCV, and the Segment Anything Model (SAM2) for object segmentation and
 uses OpenCV for generating replacement object images that fit the current
 scene. This project is designed to provide high accuracy and natural effects
 in object replacement, with a user-friendly interface and good scalability
@@ -205,7 +203,7 @@ for future enhancements.
 
 ### Objectives:
 
-- **Objective 1:** Develop a real-time object segmentation system using the Segment Anything Model (SAM).
+- **Objective 1:** Develop a object segmentation system using the Segment Anything Model (SAM2).
 - **Objective 2:** Implement object replacement functionality using OpenCV.
 - **Objective 3:** Ensure high accuracy and natural effects in object replacement.
 - **Objective 4:** Create a user-friendly interface for easy object selection and replacement.
@@ -213,7 +211,7 @@ for future enhancements.
 ### Scope:
 
 - **In-Scope:**
-    - Development of a real-time object segmentation system using the Segment Anything Model (SAM).
+    - Development of a object segmentation system using the Segment Anything Model (SAM2).
     - Implementation of object replacement functionality using OpenCV.
     - Integration of a user-friendly interface for object selection and replacement.
     - Ensuring high accuracy and natural effects in object replacement.
@@ -221,28 +219,28 @@ for future enhancements.
 - **Out-of-Scope:**
     - Advanced image processing techniques beyond simple processing of segmented images.
     - Integration with external systems or databases beyond the scope of the project.
-    - Real-time object tracking or complex object interactions.
+    - Object tracking or complex object interactions.
     - Integration with other computer vision libraries beyond OpenCV.
-    - Integration with other machine learning models beyond SAM.
+    - Integration with other machine learning models beyond SAM2.
 
 ### Purpose:
 
 The purpose of this project is to develop a system that can segment and
-replace objects in real-time, providing high accuracy and natural effects.
+replace objects, providing high accuracy and natural effects.
 This system aims to enhance user experience by offering a user-friendly
 interface and scalability for future enhancements.
 
 ### Problem Statement:
 
 The current challenge is to develop a system that can accurately segment and
-replace objects in real-time, ensuring high accuracy and natural effects.
+replace objects, ensuring high accuracy and natural effects.
 This involves leveraging advanced image processing and machine learning
 techniques to achieve seamless object replacement, which is crucial for
 applications requiring real-time interaction and visual fidelity.
 
 ### Expected Outcomes:
 
-- **Outcome 1:** The system can segment and replace objects in real-time with high accuracy.
+- **Outcome 1:** The system can segment and replace objects with high accuracy.
 - **Outcome 2:** The system provides a user-friendly interface for easy object selection and replacement.
 - **Outcome 3:** The system achieves natural effects in object replacement, enhancing user experience.
 

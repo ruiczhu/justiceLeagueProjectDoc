@@ -6,16 +6,15 @@
 ## Task 2.1: Specify Requirements
 
 ### Hardware Requirements:
-- **Camera**: A high-definition camera for capturing real-time video input.
-- **Computer**: A computer with a multi-core processor (Intel i5 or higher) and at least 8GB of RAM.
-- **GPU**: A dedicated GPU (NVIDIA GTX 1060 or higher) for accelerating deep learning model inference.
-- **Storage**: At least 20GB of free disk space for storing models and datasets.
+- **Computer**: A computer with a multi-core processor (Intel i5 or higher) and at least 16GB of RAM.
+- **GPU**: A dedicated GPU (NVIDIA GTX 3060 or higher) for accelerating deep learning model inference.
+- **Storage**: At least 50GB of free disk space for storing models and datasets.
 
 ### Software Requirements:
-- **Python**: Version 3.7 or higher.
+- **Python**: Version 3.10 or higher.
 - **OpenCV**: For image processing and computer vision tasks.
-- **Segment Anything Model (SAM)**: For object segmentation.
-- **PyTorch**: For loading and running the SAM model.
+- **Segment Anything Model (SAM2)**: For object segmentation.
+- **PyTorch**: For loading and running the SAM2 model.
 - **NumPy**: For array and matrix operations.
 - **Matplotlib**: For visualizing results (optional).
 
@@ -33,180 +32,247 @@ The system architecture for the Real-time Object Segmentation and Replacement Sy
 - **Replacement Module**: Replaces the segmented objects with user-specified objects.
 - **Output Module**: Displays the processed video frames in real-time.
 
-#### 2. **Data Flow Diagram**
+
+#### 2. **Component Descriptions**
+
+The `add_point` function is a key component of the Video Creative System. It allows for the addition of new points in a video frame for object tracking and manipulation. 
+
+```python
+def add_point(
+        predictor,
+        inference_state, 
+        frame_idx, 
+        obj_id, 
+        points=None, 
+        labels=None, 
+        clear_old_points=True,
+        box=None,
+    ):
+    
+    points = np.array(points, dtype=np.float32)
+    labels = np.array(labels, np.int32)
+    prompts[obj_id] = points, labels
+    out_frame_idx, out_obj_ids, out_mask_logits = predictor.add_new_points_or_box(
+        inference_state=inference_state,
+        frame_idx=frame_idx,
+        obj_id=obj_id,
+        points=points,
+        labels=labels,
+        clear_old_points=clear_old_points,
+        box=box,
+    )
+  
+    return out_obj_ids, out_mask_logits
 ```
-+----------------+       +-------------------+       +-------------------+       +-------------------+       +-------------------+
-|                |       |                   |       |                   |       |                   |       |                   |
-|  Input Module  +------>+ Preprocessing     +------>+ Segmentation      +------>+ Processing        +------>+ Replacement       |
-|                |       | Module            |       | Module            |       | Module            |       | Module            |
-|                |       |                   |       |                   |       |                   |       |                   |
-+----------------+       +-------------------+       +-------------------+       +-------------------+       +-------------------+
-        |                                                                                                                        |
-        |                                                                                                                        |
-        |                                                                                                                        |
-        +------------------------------------------------------------------------------------------------------------------------+
-                                                                 |
-                                                                 |
-                                                                 v
-                                                       +-------------------+
-                                                       |                   |
-                                                       |  Output Module    |
-                                                       |                   |
-                                                       +-------------------+
+
+The `predict_video` function is another essential component of the Video Creative System. It handles the propagation of predictions throughout a video and collects the segmentation results for each frame. 
+
+```python
+def predict_video(
+        predictor, 
+        inference_state,
+        start_frame_idx=None,
+        max_frame_num_to_track=None,
+        reverse=False,
+    ):
+    # run propagation throughout the video and collect the results in a dict
+    video_segments = {}  # video_segments contains the per-frame segmentation results
+    predict_result = predictor.propagate_in_video(
+        inference_state, 
+        start_frame_idx=start_frame_idx, 
+        max_frame_num_to_track=max_frame_num_to_track, 
+        reverse=reverse)
+    for out_frame_idx, out_obj_ids, out_mask_logits in predict_result:
+        video_segments[out_frame_idx] = {
+            out_obj_id: (out_mask_logits[i] > 0.0).cpu().numpy()
+            for i, out_obj_id in enumerate(out_obj_ids)
+        }
+    return video_segments
 ```
 
-#### 3. **Component Descriptions**
+The `predict_video_all` function is a vital component of the Video Creative System. It combines the predictions from different segments of the video, ensuring a comprehensive and continuous result. 
 
-- **Input Module**:
-   - Captures real-time video input using OpenCV.
-   - Example: `cv2.VideoCapture(0)`
+```python
+def predict_video_all(
+        predictor,
+        inference_state,
+        start_frame_idx,
+        max_frame_num_to_track=None,
+        reverse=False,
+    ):
 
-- **Preprocessing Module**:
-   - Converts the captured video frames to the format required by the SAM model.
-   - Example: `cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)`
+    if start_frame_idx > 0:
+        # Generate two new dictionaries
+        video_segments_pre = predict_video(predictor, inference_state, start_frame_idx=start_frame_idx-1, reverse=True)
+        video_segments_post = predict_video(predictor, inference_state, start_frame_idx=start_frame_idx)
 
-- **Segmentation Module**:
-   - Uses the SAM model to segment objects in the video frames.
-   - Example: `masks = sam.predict(input_image)`
+        # Merge dictionaries
+        combined_dict = {**video_segments_pre, **video_segments_post}
+        # Sort keys and create a new dictionary
+        sorted_keys = sorted(combined_dict.keys())
+        sorted_dict = {key: combined_dict[key] for key in sorted_keys}
+        video_segments_all = sorted_dict
+    else:
+        video_segments_all = predict_video(predictor, inference_state, start_frame_idx)
 
-- **Processing Module**:
-   - Applies simple processing (e.g., converting to grayscale) to the segmented objects.
-   - Example: `gray_area = cv2.cvtColor(segmented_area, cv2.COLOR_BGR2GRAY)`
+    return video_segments_all
+```
 
-- **Replacement Module**:
-   - Replaces the segmented objects with user-specified objects.
-   - Example: `frame[mask == 1] = cv2.cvtColor(gray_area, cv2.COLOR_GRAY2BGR)[mask == 1]`
+The `apply_object_effect` function applies various effects to the object in the video frame. 
 
-- **Output Module**:
-   - Displays the processed video frames in real-time.
-   - Example: `cv2.imshow('Real-time Segmentation with Simple Processing', frame)`
+```python
+def apply_object_effect(frame, mask, effect):
+    result = frame.copy()
 
-#### 4. **System Components**
+    if effect == "erase":
+        # Replace object with white (erased)
+        result[mask == 255] = [255, 255, 255]  # Set object area to white
 
-- **Camera**: Captures real-time video input.
-- **Computer**: Processes the video frames using the SAM model and OpenCV.
-- **GPU**: Accelerates the deep learning model inference.
-- **Display**: Shows the processed video frames in real-time.
+    elif effect == "gradient":
+        # Create a horizontal gradient across the width of the mask
+        gradient = np.linspace(0, 255, frame.shape[1], dtype=np.uint8)  # Generate gradient over width
+        gradient = np.tile(gradient, (frame.shape[0], 1))  # Repeat gradient across height
+        gradient_3channel = np.dstack([gradient] * 3)  # Convert to 3-channel (R, G, B)
 
-This architecture ensures that the system can perform real-time object segmentation and replacement efficiently, providing high accuracy and natural effects.
-### 所需工具和库
+        # Apply the gradient to the object region
+        result[mask == 255] = gradient_3channel[mask == 255]
 
-1. **Python**: 编程语言。
-2. **OpenCV**: 用于图像处理和计算机视觉任务。
-3. **Segment Anything Model (SAM)**: 用于物体分割。
-4. **GALA3D**: 用于生成复杂三维场景的生成式模型。
-5. **PyTorch**: 深度学习框架，用于加载和运行SAM和GALA3D模型。
-6. **NumPy**: 处理数组和矩阵操作。
-7. **Matplotlib**: 可视化结果（可选）。
+    elif effect == "pixelate":
+        # Pixelate the object by downscaling and then upscaling the object region
+        small = cv2.resize(result, (10, 10))  # Downscale to 10x10
+        pixelated_region = cv2.resize(small, (result.shape[1], result.shape[0]), interpolation=cv2.INTER_NEAREST)
+        result[mask == 255] = pixelated_region[mask == 255]
 
-### 实现步骤
+    elif effect == "overlay":
+        # Apply a green overlay to the object
+        overlay = np.full_like(result, [0, 255, 0])  # Green overlay
+        result[mask == 255] = overlay[mask == 255]
 
-1. **环境设置**
-    - 安装所需的库：
-      ```bash
-      pip install opencv-python-headless numpy matplotlib torch
-      ```
+    elif effect == "emoji":
+        # Apply an emoji overlay to the object region (Make sure emoji.png exists)
+        emoji = cv2.resize(cv2.imread("C:/Users/26087/Desktop/emoji.png"), (mask.shape[1], mask.shape[0]))
+        result[mask == 255] = emoji[mask == 255]
 
-2. **加载和初始化模型**
-    - 使用PyTorch加载预训练的SAM模型和GALA3D模型：
-      ```python
-      import torch
-      sam_model = torch.load('path_to_sam_model.pth')
-      gala3d_model = torch.load('path_to_gala3d_model.pth')
-      ```
+    elif effect == "burst":
+        result = draw_burst(result, mask)  # Use the 2D mask
 
-3. **捕获视频输入**
-    - 使用OpenCV从摄像头捕获视频流：
-      ```python
-      import cv2
-      cap = cv2.VideoCapture(0)
-      while True:
-          ret, frame = cap.read()
-          if not ret:
-              break
-          # 处理帧
-          cv2.imshow('Frame', frame)
-          if cv2.waitKey(1) & 0xFF == ord('q'):
-              break
-      cap.release()
-      cv2.destroyAllWindows()
-      ```
+    return result
+```
 
-4. **物体分割**
-    - 使用SAM模型对每一帧进行物体分割：
-      ```python
-      def segment_object(frame, sam_model):
-          # 预处理帧
-          input_tensor = preprocess_frame(frame)
-          # 进行分割
-          masks = sam_model(input_tensor)
-          return masks
-      ```
+The `apply_background_effect` function applies various effects to the background of the video frame. 
 
-5. **生成替换物体**
-    - 使用GALA3D模型生成新的物体图像：
-      ```python
-      def generate_object(gala3d_model, condition):
-          # 生成新的物体图像
-          generated_image = gala3d_model(condition)
-          return generated_image
-      ```
+```python
+def apply_background_effect(frame, mask, effect):
+    result = frame.copy()
 
-6. **物体替换**
-    - 将分割出的物体替换为生成的物体：
-      ```python
-      def replace_object(frame, masks, generated_image):
-          for mask in masks:
-              # 找到物体的边界
-              contours, _ = cv2.findContours(mask, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
-              for contour in contours:
-                  x, y, w, h = cv2.boundingRect(contour)
-                  # 替换物体
-                  frame[y:y+h, x:x+w] = cv2.resize(generated_image, (w, h))
-          return frame
-      ```
+    # Invert the mask to get the background (where mask == 0)
+    background_mask = (mask == 0)
 
-7. **整合**
-    - 将所有步骤整合到主循环中：
-      ```python
-      while True:
-          ret, frame = cap.read()
-          if not ret:
-              break
-          masks = segment_object(frame, sam_model)
-          condition = extract_condition(frame)  # 提取生成条件
-          generated_image = generate_object(gala3d_model, condition)
-          frame = replace_object(frame, masks, generated_image)
-          cv2.imshow('Frame', frame)
-          if cv2.waitKey(1) & 0xFF == ord('q'):
-              break
-      cap.release()
-      cv2.destroyAllWindows()
-      ```
+    if effect == "erase":
+        # Set the background to white (erased)
+        result[background_mask] = [255, 255, 255]  # Set background to white
 
-### 注意事项
+    elif effect == "gradient":
+        # Create a horizontal gradient across the width of the image
+        gradient = np.linspace(0, 255, frame.shape[1], dtype=np.uint8)  # Generate gradient over width
+        gradient = np.tile(gradient, (frame.shape[0], 1))  # Repeat gradient across height
+        gradient_3channel = np.dstack([gradient] * 3)  # Convert to 3-channel (R, G, B)
 
-- **性能优化**: 实时处理需要高效的代码和硬件支持，可能需要GPU加速。
-- **数据准备**: 确保生成的物体图像与分割出的物体大小和形状匹配。
-- **用户交互**: 提供用户界面让用户选择要分割和替换的物体。
+        # Apply the gradient to the background region
+        result[background_mask] = gradient_3channel[background_mask]
 
-希望这些信息对你有帮助！如果你有任何问题或需要进一步的帮助，请随时告诉我。
+    elif effect == "pixelate":
+        # Pixelate the background by downscaling and then upscaling the background region
+        small = cv2.resize(result, (10, 10))  # Downscale to 10x10
+        pixelated_region = cv2.resize(small, (result.shape[1], result.shape[0]), interpolation=cv2.INTER_NEAREST)
+        result[background_mask] = pixelated_region[background_mask]
 
-Source: Conversation with Copilot, 2024/9/24
-(1) python opencv实现图像分割（附代码）_python cv2
-图片切割-CSDN博客. https://blog.csdn.net/qq_43128256/article/details/138194248.
-(2) Python 计算机视觉（十二）—— OpenCV 进行图像分割_opencv
-图像分割-CSDN博客. https://blog.csdn.net/qq_52309640/article/details/120941157.
-(3) Python OpenCV物体分割：从图像到应用-百度开发者中心. https://developer.baidu.com/article/details/2917521.
-(4) Python图像处理实战：使用OpenCV实现图片切割 - 百度智能云. https://cloud.baidu.com/article/3354734.
-(5) OpenCV-Python图像分割与Watershed算法：基础理解与实践 - Baidu. https://developer.baidu.com/article/details/3043590.
+    elif effect == "desaturate":
+        # Desaturate the background (convert to grayscale)
+        gray = cv2.cvtColor(result, cv2.COLOR_BGR2GRAY)
+        result[background_mask] = cv2.cvtColor(gray, cv2.COLOR_GRAY2BGR)[background_mask]
 
-Source: Conversation with Copilot, 2024/9/24
-(1) ICML 2024｜复杂组合3D场景生成，LLMs对话式3D可控生成编辑框架来了 |
-机器之心. https://www.jiqizhixin.com/articles/2024-07-31-4.
-(2) 3D生成研究进展：最新最全综述 - 知乎 - 知乎专栏. https://zhuanlan.zhihu.com/p/681188168.
-(3) 生成式AI：OpenAI与百度引领大模型+小样本适配垂类场景. https://cloud.baidu.com/article/530932.
-(4) 生成式AI：OpenAI与百度引领大模型+小样本适配垂类场景. https://developer.baidu.com/article/detail.html?id=530932.
-(5) undefined. https://arxiv.org/pdf/2402.07207.
-(6) undefined. https://github.com/VDIGPKU/GALA3D.
-(7) undefined. https://gala3d.github.io/.
+    elif effect == "blur":
+        # Blur the background using Gaussian blur
+        blurred_bg = cv2.GaussianBlur(result, (21, 21), 0)
+        result[background_mask] = blurred_bg[background_mask]
+
+    return result
+```
+
+The `apply_masks_to_video` function processes the video frames by applying the specified object and background effects and writes the results to an output video file. 
+
+```python
+def apply_masks_to_video(video_path, video_segments_all, output_path, effect, object_effect, background_effect):
+    # Open the video file
+    cap = cv2.VideoCapture(video_path)
+
+    # Get the basic information of the video
+    fps = cap.get(cv2.CAP_PROP_FPS)
+    width = int(cap.get(cv2.CAP_PROP_FRAME_WIDTH))
+    height = int(cap.get(cv2.CAP_PROP_FRAME_HEIGHT))
+
+    # Create a VideoWriter object to save the output video
+    fourcc = cv2.VideoWriter_fourcc(*"MJPG")  # Use mp4 encoding
+    out = cv2.VideoWriter(output_path, fourcc, fps, (width, height))
+
+    frame_index = 0
+    while cap.isOpened():
+        ret, frame = cap.read()
+        if not ret:
+            break
+
+        # Gets the mask of the current frame
+        if frame_index in video_segments_all:
+            masks = video_segments_all[frame_index]  # Gets all the masks for the current frame
+
+            for obj_id, mask in masks.items():
+                # The shape of the mask is (1, 720, 1280) and we need to convert it to (720, 1280)
+                mask = mask[0]  # Remove the first dimension and become (720, 1280)
+
+                # Convert the Boolean mask to a uint8 type
+                mask = (mask * 255).astype(np.uint8)  # Convert True/False to 255/0
+
+                if effect:
+                    # Apply object and background effects
+                    masked_frame = apply_background_effect(frame, mask, effect=background_effect)
+                    masked_frame = apply_object_effect(masked_frame, mask, effect=object_effect)
+                else:
+                    # Create a color mask
+                    colored_mask = np.zeros((height, width, 3),
+                                            dtype=np.uint8)  # Create an image that is completely black
+                    colored_mask[mask == 255] = [0, 255, 0]  # Set the mask area to green (BGR format)
+
+                    # Applies a color mask to the current frame
+                    masked_frame = cv2.addWeighted(frame, 1, colored_mask, 0.5, 0)  # Overlay the mask onto the frame
+
+                # Write the processed frame to the output video
+                out.write(masked_frame)
+        else:
+            # If there is no mask, write directly to the original frame
+            out.write(frame)
+
+        frame_index += 1
+
+    # Release resources
+    cap.release()
+    out.release()
+    cv2.destroyAllWindows()
+
+    output_avi_path = output_path
+
+    base_name, ext = os.path.splitext(output_avi_path)
+
+    output_mp4_path = base_name + ".mp4"
+
+    output_avi_path = output_avi_path.replace('\\', '/')
+
+    output_mp4_path = output_mp4_path.replace('\\', '/')
+
+    print(output_mp4_path, output_avi_path)
+
+    convert_avi_to_mp4(output_avi_path, output_mp4_path)
+```
+
+
+

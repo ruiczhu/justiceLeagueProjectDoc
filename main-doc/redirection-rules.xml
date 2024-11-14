@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE rules SYSTEM "https://resources.jetbrains.com/writerside/1.0/redirection-rules.dtd">
+<rules>
+    <!-- format is as follows
+    <rule id="<unique id>">
+        <accepts>page.html</accepts>
+    </rule>
+    -->
+    <rule id="10931648">
+        <description>Created after removal of "Presentation" from Justice League Project</description>
+        <accepts>Presentation.html</accepts>
+    </rule>
+    <rule id="705ffc6d">
+        <description>Created after removal of "System Analysis" from Justice League Project</description>
+        <accepts>System-Analysis.html</accepts>
+    </rule>
+</rules>

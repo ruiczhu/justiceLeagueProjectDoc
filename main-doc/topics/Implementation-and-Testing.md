@@ -1,9 +1,20 @@
 # Implementation and Testing
 
-## Task 3.1: Implement the System
-- Implement the developed system components, such as the user interface and data storage.
-- Deliverable: Integrated system code and architecture documentation.
+- [Task 3: Implement the System](#task-3-implement-the-system)
 
-## Task 3.2: Test the System
-- Conduct comprehensive testing of the system to ensure it meets the specified requirements and goals.
-- Deliverable: Test plan documentation and test results report, including bug fixes and improvements.
+## Task 3: Implement the System
+![System Main Interface](../images/1.png)
+
+*Figure: The main interface of the system.*
+
+![User Imported Video Interface](../images/2.png)
+
+*Figure: The interface after the user imports a video.*
+
+![Tracking Effect After Adding Points](../images/3.png)
+
+*Figure: The effect after adding points and tracking.*
+
+![Video with Object Effects](../images/4.png)
+
+*Figure: The video after applying effects to the object.*
