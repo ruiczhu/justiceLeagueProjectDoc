@@ -19,15 +19,15 @@ In this project, we use SAM2 for video processing and integrate OpenCV to achiev
 
 1. Fork the repository.
 2. Create a new branch:
-    ```sh
+    ```bash
     git checkout -b feature-branch
     ```
 3. Commit your changes:
-    ```sh
+    ```bash
     git commit -am 'Add new feature'
     ```
 4. Push to the branch:
-    ```sh
+    ```bash
     git push origin feature-branch
     ```
 5. Create a new Pull Request.
@@ -35,7 +35,7 @@ In this project, we use SAM2 for video processing and integrate OpenCV to achiev
 ## Citing SAM 2
 - SAM2 Repository: https://github.com/facebookresearch/segment-anything-2\
 
-```
+```text
 @article{ravi2024sam2,
   title={SAM 2: Segment Anything in Images and Videos},
   author={Ravi, Nikhila and Gabeur, Valentin and Hu, Yuan-Ting and Hu, Ronghang and Ryali, Chaitanya and Ma, Tengyu and Khedr, Haitham and R{\"a}dle, Roman and Rolland, Chloe and Gustafson, Laura and Mintun, Eric and Pan, Junting and Alwala, Kalyan Vasudev and Carion, Nicolas and Wu, Chao-Yuan and Girshick, Ross and Doll{\'a}r, Piotr and Feichtenhofer, Christoph},
