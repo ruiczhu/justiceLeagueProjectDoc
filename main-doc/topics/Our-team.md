@@ -11,32 +11,60 @@ We are the Justice League, a team of six dedicated members working together to d
 
 ### ZHU Ruichen
 
-**Role**: Oversees the entire project, ensuring timelines and deliverables are met.
+**Role**: 
 
-**Role**: Construction of front-end and back-end as well as configuration and use of SAM2 model.
+- Oversees the entire project, ensuring timelines and deliverables are met.
+- Construction of front-end and back-end.
+- Configuration and use of the SAM2 model.
+- Model configuration, deployment and operation.
+- Write test code according to the requirements of test members and get the required test data.
 
-## Developer 2
+## System Developer
 
 ### Huang Xinghua
 
-**Role**: Build the front and back ends and use OpenCV to add effects to specified objects and backgrounds.
+**Role**: 
+
+- Build the front and back ends.
+- Use OpenCV to add effects to specified objects and backgrounds.
+- Providing hardware equipment for group projects.
 
 ## UI/UX Designer
 
 ### Tang Bowen
 
-**Role**: Provide design solutions for video processing effects and front-end design.
+**Role**: 
+- Provide design solutions for video processing effects and front-end design.
+- Provide design support for the project.
+- Create and beautify slides for project presentations.
 
-## Documentation Specialist
+## Quality Assurance Specialist
 
-### Dong Xinyu, Cheng Yingtong, Guan Yuqi
+### Dong Xinyu
 
 **Role**: 
-Conduct research on model selection to help determine the team's project direction and planning. 
-Complete testing of the system.
-Compiles and prepares all reports and documentation.
-Provide theoretical support for model selection.
+- Complete testing of the system.
+- Develop test indicators and test cases.
+- Conduct research on model selection to help determine the team's project direction and planning.
+- Prepare some documents and reports.
 
+## Documentation Specialist and Tester
+
+### Guan Yuqi
+
+**Role**:
+- Compiles and prepares all reports and documentation.
+- Formulate test indicators and propose test requirements.
+- Conduct research on model selection to help determine the team's project direction and planning.
+
+## Research Specialist
+
+### Cheng Yingtong
+
+**Role**:
+- Conduct research on model selection to help determine the team's project direction and planning.
+- Conduct in-depth research on the model and provide theoretical support for the project.
+- Prepare some documents and reports.
 
 ## Our tasks
 
